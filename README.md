@@ -1,3 +1,4 @@
+
 # student-practice — Observability by hand, without OpenTelemetry
 
 A hands-on lab that builds the three observability pillars for bankobs **one at a time, by

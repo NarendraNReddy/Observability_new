@@ -1,0 +1,17 @@
+# Global defaults shared by every per-service sub-chart under charts/.
+global:
+  registry: ghcr.io/bankobserve360        # overridden to the public ECR by ../values-kind.yaml
+  imageTag: "1.0.0"
+  pullPolicy: IfNotPresent
+  observability:
+    mode: full                            # full | partial | dark
+  pii:
+    mode: full
+  otel:
+    endpoint: http://otel-collector.monitoring.svc.cluster.local:4317
+
+# fault-injector ships dormant. Arm it with:
+#   kubectl -n bankobs scale deploy/fault-injector --replicas=1
+fault-injector:
+  faultInjector:
+    replicas: 0

@@ -1,0 +1,12 @@
+apiVersion: v2
+name: bankobserve360
+description: BankObserve360 — the bankobs application. One sub-chart PER SERVICE under charts/.
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+maintainers:
+  - name: BankObserve360 Team
+
+# No `dependencies:` list — Helm automatically loads every directory under charts/ as a
+# sub-chart. Each service is its own folder (charts/<service>/), so you can read and edit one
+# service on its own. Add a service by dropping in a new folder; remove one by deleting it.

@@ -1,0 +1,218 @@
+{
+  "uid": "bankobs-errors",
+  "title": "bankobs — Errors by service",
+  "tags": [
+    "bankobs",
+    "errors"
+  ],
+  "schemaVersion": 39,
+  "editable": true,
+  "time": {
+    "from": "now-15m",
+    "to": "now"
+  },
+  "refresh": "30s",
+  "templating": {
+    "list": [
+      {
+        "name": "datasource",
+        "label": "Prometheus",
+        "type": "datasource",
+        "query": "prometheus",
+        "current": {
+          "selected": true,
+          "text": "default",
+          "value": "default"
+        },
+        "hide": 0
+      },
+      {
+        "name": "service",
+        "label": "Service",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${datasource}"
+        },
+        "query": "label_values({__name__=~\"http_requests_total|http_server_requests_total\", namespace=\"bankobs\"}, app)",
+        "includeAll": true,
+        "allValue": ".*",
+        "multi": true,
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "refresh": 2,
+        "sort": 1
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "Error rate by service (4xx + 5xx, req/s) — tallest line = the culprit",
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "links": [
+            {
+              "title": "🔍 Error traces (${__field.name}) → Explore",
+              "targetBlank": false,
+              "url": "/explore?schemaVersion=1&panes=%7B%22trc%22%3A%7B%22datasource%22%3A%22JAEGER_UID%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22type%22%3A%22jaeger%22%2C%22uid%22%3A%22JAEGER_UID%22%7D%2C%22queryType%22%3A%22search%22%2C%22service%22%3A%22${__field.name}%22%2C%22tags%22%3A%22error%3Dtrue%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22now-1h%22%2C%22to%22%3A%22now%22%7D%7D%7D&orgId=1"
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (app) (rate({__name__=~\"http_requests_total|http_server_requests_total\", namespace=\"bankobs\", app=~\"$service\", status=~\"[45]xx\"}[$__rate_interval])) > 0",
+          "legendFormat": "{{app}}"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "table",
+      "title": "Top services by errors / sec  (click a row → its error traces)",
+      "gridPos": {
+        "h": 10,
+        "w": 10,
+        "x": 0,
+        "y": 10
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "links": [
+            {
+              "title": "🔍 Error traces (${__data.fields.app}) → Explore",
+              "targetBlank": false,
+              "url": "/explore?schemaVersion=1&panes=%7B%22trc%22%3A%7B%22datasource%22%3A%22JAEGER_UID%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22type%22%3A%22jaeger%22%2C%22uid%22%3A%22JAEGER_UID%22%7D%2C%22queryType%22%3A%22search%22%2C%22service%22%3A%22${__data.fields.app}%22%2C%22tags%22%3A%22error%3Dtrue%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22now-1h%22%2C%22to%22%3A%22now%22%7D%7D%7D&orgId=1"
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "sortBy": [
+          {
+            "displayName": "Value",
+            "desc": true
+          }
+        ]
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "instant": true,
+          "expr": "sum by (app) (rate({__name__=~\"http_requests_total|http_server_requests_total\", namespace=\"bankobs\", app=~\"$service\", status=~\"[45]xx\"}[5m])) > 0"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "job": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "4xx vs 5xx over time (by service)",
+      "gridPos": {
+        "h": 10,
+        "w": 14,
+        "x": 10,
+        "y": 10
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (app, status) (rate({__name__=~\"http_requests_total|http_server_requests_total\", namespace=\"bankobs\", app=~\"$service\", status=~\"[45]xx\"}[$__rate_interval])) > 0",
+          "legendFormat": "{{app}} {{status}}"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "table",
+      "title": "Top failing endpoints (service · handler · status)",
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 20
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "options": {
+        "sortBy": [
+          {
+            "displayName": "Value",
+            "desc": true
+          }
+        ]
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "instant": true,
+          "expr": "topk(15, sum by (app, handler, status) (rate({__name__=~\"http_requests_total|http_server_requests_total\", namespace=\"bankobs\", app=~\"$service\", status=~\"[45]xx\"}[5m])))"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "job": true
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

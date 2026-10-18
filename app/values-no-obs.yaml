@@ -1,0 +1,24 @@
+# Overlay that deploys the bankobs application with observability switched OFF.
+#
+# Layered on top of the umbrella chart's own values:
+#   helm upgrade --install bankobs ../bankobs/helm/bankobserve360 \
+#     -f ../bankobs/helm/bankobserve360/values.yaml \
+#     -f ../bankobs/values-kind.yaml \
+#     -f values-no-obs.yaml
+#
+# This is the starting line of the lab: 75 services running, emitting nothing, collected by
+# nothing. `make app` deploys this and turns the telemetry SDK off (OTEL_SDK_DISABLED=true),
+# so you begin from zero and add each pillar by hand.
+global:
+  # dark = the SDK is loaded but exports nothing. The app runs identically; it just stays
+  # silent until YOU point a backend at it in the later sections.
+  observability:
+    mode: dark
+
+# Do NOT deploy the chart's bundled observability sub-chart — this lab builds Prometheus,
+# Loki and Jaeger by hand, one section at a time.
+observability-stack: { enabled: false }
+
+# Not published to the public registry; would ImagePullBackOff. The lab generates its own
+# traffic (see `make traffic`).
+loadrunner: { enabled: false }

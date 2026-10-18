@@ -1,0 +1,19 @@
+# values-kind.yaml — overrides for the kind deployment.
+# Layered on top of the chart's values.yaml:
+#   helm upgrade --install bankobs helm/bankobserve360 \
+#     -f helm/bankobserve360/values.yaml -f values-kind.yaml
+global:
+  # All bankobs images are public on ECR.
+  registry: public.ecr.aws/w8x4g9h7/obs-v1
+  imageTag: "1.0.0"
+  pullPolicy: IfNotPresent
+
+  observability:
+    mode: full
+
+  # kind ships the rancher.io/local-path provisioner as the default
+  # StorageClass, named "standard".
+  storageClass: standard
+
+# (loadrunner and the observability-stack sub-charts were removed from this repo — this lab
+#  generates its own traffic via scripts/loadrunner.sh and builds the monitoring stack by hand.)

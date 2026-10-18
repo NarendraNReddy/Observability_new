@@ -21,10 +21,10 @@ spec:
         domain: core-banking
         log_format: json
       # ─── opt this service INTO monitoring: uncomment these three lines ───
-      annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/path:   "/metrics"
-        prometheus.io/port:   "8001"
+      # annotations:
+      #  prometheus.io/scrape: "true"
+      #  prometheus.io/path:   "/metrics"
+      #  prometheus.io/port:   "8001"
     spec:
       containers:
         - name: account-service

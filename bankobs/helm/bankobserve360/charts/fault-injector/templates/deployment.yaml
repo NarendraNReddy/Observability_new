@@ -15,7 +15,7 @@ spec:
   replicas: {{ $fi.replicas | default 0 }}
   # The injector holds all fault state in memory; two of them would fight over
   # the same workloads and each would only know half the blast radius.
-  strategy: { type: Recreate }
+  strategy: { type: RollingUpdate }
   selector: { matchLabels: { app: fault-injector } }
   template:
     metadata:
